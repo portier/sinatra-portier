@@ -9,6 +9,7 @@ require 'ipaddr'
 require "sinatra/base"
 require 'sinatra/browserid/helpers'
 require 'sinatra/browserid/template'
+require 'addressable/uri'
 
 # This module provides an interface to verify a users email address
 # with browserid.org.
@@ -33,7 +34,8 @@ module Sinatra
               begin
                   # 3. Server checks signature
                   # for that, fetch the public key from the LA instance (TODO: Do that beforehand for trusted instances, and generally cache the key)
-                  public_key_jwks = ::JSON.parse(URI.parse(URI.escape(settings.browserid_url + '/keys.json')).read)
+                  public_key_jwks_uri = Addressable::URI.parse(settings.browserid_url + '/keys.json')
+                  public_key_jwks = ::JSON.parse(URI.parse(public_key_jwks_uri).read)
                   public_key = OpenSSL::PKey::RSA.new
                   if public_key.respond_to? :set_key
                     # set n and d via the new set_key function, as direct access to n and e is blocked for some ruby and openssl versions.
