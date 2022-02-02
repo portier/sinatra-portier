@@ -61,9 +61,14 @@ module Sinatra
         redirect_url ||= request.url
         session['redirect_url'] = redirect_url
 
-        nonce = session[:nonce]
-        unless nonce
-          session[:nonce] = nonce = SecureRandom.base64
+        if session[:nonce]
+            nonce = session[:nonce]
+            # Try to limit how many nonces are stored by keeping the session nonce alive
+            Cachy.delete_key(nonce)
+            Cachy.cache(nonce, expires_in: 600) { true }
+        else
+            session[:nonce] = nonce = SecureRandom.base64
+            Cachy.cache(nonce, expires_in: 600) { true }
         end
 
         template = ERB.new(Templates::LOGIN_BUTTON)
