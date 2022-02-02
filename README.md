@@ -1,4 +1,4 @@
-Sinatra plugin that allows authentication against portier, the successor for [Persona](https://login.persona.org/about). Like Persona, this lets you verify the email identity of a user.
+Sinatra plugin that allows authentication against portier, the successor for [Persona](https://github.com/mozilla/persona). Like Persona, this lets you verify the email identity of a user.
 
 To be a drop-in replacement, the code keeps using the browserid namespace.
 
