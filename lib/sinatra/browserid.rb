@@ -46,11 +46,16 @@ module Sinatra
                   public_key_jwks = ::JSON.parse(URI.parse(public_key_jwks_uri).read)
                   public_key = OpenSSL::PKey::RSA.new
                   if public_key.respond_to? :set_key
-                    # Set n and d via the new set_key function, as direct access to n and e is blocked for some ruby and openssl versions.
-                    # Note that we have no d, as this is a public key, which would be the third param
-                    public_key.set_key( (OpenSSL::BN.new UrlSafeBase64.decode64(public_key_jwks["keys"][0]["n"]), 2),
-                                        (OpenSSL::BN.new UrlSafeBase64.decode64(public_key_jwks["keys"][0]["e"]), 2),
-                                        nil)
+                    # We initially set n and d via the then new set_key function, as direct access to n and e is blocked for some ruby and openssl versions.
+                    # But with OpenSSL 3 this function throws an error, as keys are immutable now. Instead we have to generate the key directly with
+                    # the right params, as in https://github.com/railslove/epics/issues/138
+                    sequence = []
+                    # modulus:
+                    sequence << OpenSSL::ASN1::Integer.new(OpenSSL::BN.new(UrlSafeBase64.decode64(public_key_jwks["keys"][0]["n"]), 2))
+                    # exponent:
+                    sequence << OpenSSL::ASN1::Integer.new(OpenSSL::BN.new(UrlSafeBase64.decode64(public_key_jwks["keys"][0]["e"]), 2))
+
+                    public_key = OpenSSL::PKey::RSA.new(OpenSSL::ASN1::Sequence(sequence).to_der)
                   else
                     public_key.e = OpenSSL::BN.new UrlSafeBase64.decode64(public_key_jwks["keys"][0]["e"]), 2 
                     public_key.n = OpenSSL::BN.new UrlSafeBase64.decode64(public_key_jwks["keys"][0]["n"]), 2

@@ -1,3 +1,5 @@
 source "https://rubygems.org"
 gem 'sinatra'
-gem 'sinatra-portier'
+gem 'sinatra-portier', '1.5.2'
+gem 'puma'
+
