@@ -19,11 +19,19 @@ require 'moneta'
 module Sinatra
     module BrowserID
 
-        # Init an in-memory cache via the cachy gem. We use this
+        # Init an cache via the cachy gem. We use this
         # instead of the session because of dropped sessions
         # after redirects, see https://github.com/sinatra/sinatra/issues/1742.
-        Cachy.cache_store = Moneta.new(:Memory, expires: 600) # 10 minutes
+        begin
+            # To avoid issues when the outer server is run in multiprocess mode (like puma -w), we
+            # offer the option here to use a cache backend that will remain consistent over
+            # processes. Currently dalli for memcached, can be expanded.
+            require 'dalli'
+            Cachy.cache_store = Moneta.new(:Memcached, expires: 600)
+        rescue
+            Cachy.cache_store = Moneta.new(:Memory, expires: 600) # 10 minutes
                                                               # We need to set a global :expires here because of https://github.com/grosser/cachy/issues/7
+        end
     
         def self.registered(app)
             app.helpers BrowserID::Helpers
