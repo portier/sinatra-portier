@@ -28,7 +28,7 @@ module Sinatra
             # processes. Currently dalli for memcached, can be expanded.
             require 'dalli'
             Cachy.cache_store = Moneta.new(:Memcached, expires: 600)
-        rescue
+        rescue LoadError
             Cachy.cache_store = Moneta.new(:Memory, expires: 600) # 10 minutes
                                                               # We need to set a global :expires here because of https://github.com/grosser/cachy/issues/7
         end

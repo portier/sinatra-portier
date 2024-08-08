@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "sinatra-portier"
-  s.version = "2.1.0"
+  s.version = "2.1.1"
 
   s.authors = ["Pete Fritchman", "Malte Paskuda"]
   s.email = ["malte@paskuda.biz"]
